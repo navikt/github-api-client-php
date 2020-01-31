@@ -1,6 +1,6 @@
 {
     "name": "navikt/github-api-client",
-    "description": "Azure AD API client",
+    "description": "GitHub API client",
     "homepage": "https://github.com/navikt/github-api-client-php",
     "readme": "README.md",
     "license": "MIT",
