@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 namespace NAVIT\GitHub;
 
-use NAVIT\GitHub\Exceptions\InvalidArgumentException;
-use NAVIT\GitHub\Exceptions\RuntimeException;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ClientException;
+use InvalidArgumentException;
+use RuntimeException;
 
 class ApiClient {
     /**

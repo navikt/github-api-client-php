@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace NAVIT\GitHub\Models;
 
-use NAVIT\GitHub\Exceptions\InvalidArgumentException;
+use InvalidArgumentException;
 
 class Team extends Model {
     private $id;
