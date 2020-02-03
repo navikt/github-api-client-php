@@ -2,8 +2,6 @@
 namespace NAVIT\GitHub;
 
 use NAVIT\GitHub\Models\Team;
-use NAVIT\GitHub\Exceptions\InvalidArgumentException;
-use NAVIT\GitHub\Exceptions\RuntimeException;
 use PHPUnit\Framework\TestCase;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Handler\MockHandler;
@@ -12,6 +10,8 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Middleware;
+use InvalidArgumentException;
+use RuntimeException;
 
 /**
  * @coversDefaultClass NAVIT\GitHub\ApiClient

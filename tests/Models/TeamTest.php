@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 namespace NAVIT\GitHub\Models;
 
-use NAVIT\GitHub\Exceptions\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use InvalidArgumentException;
 
 /**
  * @coversDefaultClass NAVIT\GitHub\Models\Team
