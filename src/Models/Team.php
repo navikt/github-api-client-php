@@ -4,7 +4,14 @@ namespace NAVIT\GitHub\Models;
 use InvalidArgumentException;
 
 class Team extends Model {
+    /**
+     * @var int
+     */
     private $id;
+
+    /**
+     * @var string
+     */
     private $name;
 
     public function __construct(int $id, string $name) {

@@ -49,6 +49,7 @@ class ApiClient {
             return null;
         }
 
+        /** @var Models\Team */
         return Models\Team::fromApiResponse($response);
     }
 
@@ -69,10 +70,11 @@ class ApiClient {
                     'privacy'     => 'closed'
                 ],
             ]);
-            } catch (ClientException $e) {
-                throw new RuntimeException('Unable to create team', $e->getCode(), $e);
-            }
+        } catch (ClientException $e) {
+            throw new RuntimeException('Unable to create team', $e->getCode(), $e);
+        }
 
+        /** @var Models\Team */
         return Models\Team::fromApiResponse($response);
     }
 
@@ -192,6 +194,7 @@ GQL;
             throw new RuntimeException('Unable to update description', $e->getCode(), $e);
         }
 
+        /** @var Models\Team */
         return Models\Team::fromApiResponse($response);
     }
 
