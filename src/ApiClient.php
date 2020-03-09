@@ -3,6 +3,7 @@ namespace NAVIT\GitHub;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Psr7;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -192,5 +193,41 @@ GQL;
         }
 
         return Models\Team::fromApiResponse($response);
+    }
+
+    /**
+     * Get the next URL given a Link-header
+     *
+     * @param array $linkHeader
+     * @return ?string
+     */
+    private function getNextUrl(array $linkHeader) : ?string {
+        foreach (Psr7\parse_header($linkHeader) as $link) {
+            if (!empty($link['rel']) && 'next' === $link['rel']) {
+                return trim($link[0], '<>');
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get all repos
+     *
+     * Fetch all repos connected to the organization the client is set up for.
+     *
+     * @return array
+     */
+    public function getRepos() : array {
+        $repos = [];
+        $url = sprintf('orgs/%s/repos?per_page=100', $this->organization);
+
+        while ($url) {
+            $response = $this->httpClient->get($url);
+            $repos    = array_merge($repos, json_decode($response->getBody()->getContents(), true));
+            $url      = $this->getNextUrl($response->getHeader('Link'));
+        }
+
+        return $repos;
     }
 }
