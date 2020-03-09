@@ -34,7 +34,7 @@ class ApiClientTest extends TestCase {
             $clientHistory
         );
 
-        $githubTeam = (new ApiClient('access-token', $httpClient))->getTeam('team');
+        $githubTeam = (new ApiClient('navikt', 'access-token', $httpClient))->getTeam('team');
 
         $this->assertCount(1, $clientHistory, 'Expected one request');
         $this->assertInstanceOf(Team::class, $githubTeam);
@@ -55,7 +55,7 @@ class ApiClientTest extends TestCase {
             $clientHistory
         );
 
-        $this->assertNull((new ApiClient('access-token', $httpClient))->getTeam('team'));
+        $this->assertNull((new ApiClient('navikt', 'access-token', $httpClient))->getTeam('team'));
     }
 
     /**
@@ -72,7 +72,7 @@ class ApiClientTest extends TestCase {
             $clientHistory
         );
 
-        $this->assertNull((new ApiClient('access-token', $httpClient))->getTeam('team'));
+        $this->assertNull((new ApiClient('navikt', 'access-token', $httpClient))->getTeam('team'));
     }
 
     /**
@@ -85,7 +85,7 @@ class ApiClientTest extends TestCase {
             $clientHistory
         );
 
-        $githubTeam = (new ApiClient('access-token', $httpClient))->createTeam('team-name', 'team description');
+        $githubTeam = (new ApiClient('navikt', 'access-token', $httpClient))->createTeam('team-name', 'team description');
 
         $this->assertInstanceOf(Team::class, $githubTeam);
         $this->assertCount(1, $clientHistory, 'Expected one request');
@@ -115,7 +115,7 @@ class ApiClientTest extends TestCase {
             $clientHistory
         );
 
-        $this->assertTrue((new ApiClient('access-token', $httpClient))->syncTeamAndGroup($teamId, $groupId, $displayName, $description));
+        $this->assertTrue((new ApiClient('navikt', 'access-token', $httpClient))->syncTeamAndGroup($teamId, $groupId, $displayName, $description));
 
         $this->assertCount(1, $clientHistory, 'Expected one request');
 
@@ -211,7 +211,7 @@ class ApiClientTest extends TestCase {
             $clientHistory
         );
 
-        $this->assertSame('user3@nav.no', (new ApiClient('access-token', $httpClient))->getSamlId('user3'));
+        $this->assertSame('user3@nav.no', (new ApiClient('navikt', 'access-token', $httpClient))->getSamlId('user3'));
     }
 
     /**
@@ -290,7 +290,7 @@ class ApiClientTest extends TestCase {
             $clientHistory
         );
 
-        $this->assertNull((new ApiClient('access-token', $httpClient))->getSamlId('user5'));
+        $this->assertNull((new ApiClient('navikt', 'access-token', $httpClient))->getSamlId('user5'));
     }
 
     /**
@@ -308,7 +308,7 @@ class ApiClientTest extends TestCase {
 
         $this->assertInstanceOf(
             Team::class,
-            (new ApiClient('access-token', $httpClient))->setTeamDescription('team-name', 'team description')
+            (new ApiClient('navikt', 'access-token', $httpClient))->setTeamDescription('team-name', 'team description')
         );
 
         $this->assertCount(2, $clientHistory, 'Expected two requests');
@@ -340,7 +340,7 @@ class ApiClientTest extends TestCase {
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Team does not exist');
-        (new ApiClient('access-token', $httpClient))->setTeamDescription('team-name', 'team description');
+        (new ApiClient('navikt', 'access-token', $httpClient))->setTeamDescription('team-name', 'team description');
 
         $this->assertCount(1, $clientHistory, 'Expected one request');
     }
@@ -360,7 +360,7 @@ class ApiClientTest extends TestCase {
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Unable to update description');
-        (new ApiClient('access-token', $httpClient))->setTeamDescription('team-name', 'team description');
+        (new ApiClient('navikt', 'access-token', $httpClient))->setTeamDescription('team-name', 'team description');
 
         $this->assertCount(2, $clientHistory, 'Expected two requests');
     }

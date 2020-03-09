@@ -8,6 +8,11 @@ use RuntimeException;
 
 class ApiClient {
     /**
+     * @var string
+     */
+    private $organization;
+
+    /**
      * @var HttpClient
      */
     private $httpClient;
@@ -15,10 +20,12 @@ class ApiClient {
     /**
      * Class constructor
      *
+     * @param string $organization The organization to use
      * @param string $personalAccessToken The personal access token to use
      * @param HttpClient $httpClient Pre-configured HTTP client to use
      */
-    public function __construct(string $personalAccessToken, HttpClient $httpClient = null) {
+    public function __construct(string $organization, string $personalAccessToken, HttpClient $httpClient = null) {
+        $this->organization = $organization;
         $this->httpClient = $httpClient ?: new HttpClient([
             'base_uri' => 'https://api.github.com/',
             'auth' => ['x-access-token', $personalAccessToken],
@@ -36,7 +43,7 @@ class ApiClient {
      */
     public function getTeam(string $slug) : ?Models\Team {
         try {
-            $response = $this->httpClient->get(sprintf('orgs/navikt/teams/%s', $slug));
+            $response = $this->httpClient->get(sprintf('orgs/%s/teams/%s', $this->organization, $slug));
         } catch (ClientException $e) {
             return null;
         }
@@ -54,7 +61,7 @@ class ApiClient {
      */
     public function createTeam(string $name, string $description) : Models\Team {
         try {
-            $response = $this->httpClient->post('orgs/navikt/teams', [
+            $response = $this->httpClient->post(sprintf('orgs/%s/teams', $this->organization), [
                 'json' => [
                     'name'        => $name,
                     'description' => $description,
@@ -83,7 +90,7 @@ class ApiClient {
         $offset = null;
         $query = <<<GQL
         query {
-            organization(login: "navikt") {
+            organization(login: "%s") {
                 samlIdentityProvider {
                     externalIdentities(first: 100 %s) {
                         pageInfo {
@@ -108,7 +115,7 @@ GQL;
         do {
             try {
                 $response = $this->httpClient->post('graphql', [
-                    'json' => ['query' => sprintf($query, $offset ? sprintf('after: "%s"', $offset) : '')],
+                    'json' => ['query' => sprintf($query, $this->organization, $offset ? sprintf('after: "%s"', $offset) : '')],
                 ]);
             } catch (ClientException $e) {
                 throw new RuntimeException('Unable to get SAML ID', $e->getCode(), $e);
@@ -167,7 +174,7 @@ GQL;
      */
     public function setTeamDescription(string $slug, string $description) : Models\Team {
         try {
-            $response = $this->httpClient->get(sprintf('orgs/navikt/teams/%s', $slug));
+            $response = $this->httpClient->get(sprintf('orgs/%s/teams/%s', $this->organization, $slug));
         } catch (ClientException $e) {
             throw new InvalidArgumentException('Team does not exist', $e->getCode(), $e);
         }
