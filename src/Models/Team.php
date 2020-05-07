@@ -4,19 +4,19 @@ namespace NAVIT\GitHub\Models;
 use InvalidArgumentException;
 
 class Team extends Model {
-    /**
-     * @var int
-     */
+    /** @var int */
     private $id;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $name;
 
-    public function __construct(int $id, string $name) {
+    /** @var string */
+    private $slug;
+
+    public function __construct(int $id, string $name, string $slug) {
         $this->id = $id;
         $this->name = $name;
+        $this->slug = $slug;
     }
 
     public function getId() : int {
@@ -27,8 +27,12 @@ class Team extends Model {
         return $this->name;
     }
 
+    public function getSlug() : string {
+        return $this->slug;
+    }
+
     public static function fromArray(array $data) : self {
-        foreach (['id', 'name'] as $required) {
+        foreach (['id', 'name', 'slug'] as $required) {
             if (empty($data[$required])) {
                 throw new InvalidArgumentException(sprintf('Missing data element: %s', $required));
             }
@@ -36,7 +40,8 @@ class Team extends Model {
 
         return new self(
             $data['id'],
-            $data['name']
+            $data['name'],
+            $data['slug']
         );
     }
 }

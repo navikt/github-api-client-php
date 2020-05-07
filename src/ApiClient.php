@@ -142,16 +142,16 @@ GQL;
     /**
      * Connect a GitHub team with an Azure AD group
      *
-     * @param int $teamId The numeric ID of the GitHub team
+     * @param string $slug The team slug
      * @param string $groupId ID of the AAD group
      * @param string $displayName The display name of the AAD group
      * @param string $description The description of the AAD group
      * @throws RuntimeException
      * @return bool
      */
-    public function syncTeamAndGroup(int $teamId, string $groupId, string $displayName, string $description) : bool {
+    public function syncTeamAndGroup(string $slug, string $groupId, string $displayName, string $description) : bool {
         try {
-            $this->httpClient->patch(sprintf('teams/%d/team-sync/group-mappings', $teamId), [
+            $this->httpClient->patch(sprintf('orgs/%s/teams/%s/team-sync/group-mappings', $this->organization, $slug), [
                 'json' => [
                     'groups' => [[
                         'group_id'          => $groupId,
