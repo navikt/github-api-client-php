@@ -12,12 +12,14 @@ class TeamTest extends TestCase {
      * @covers ::fromArray
      * @covers ::getId
      * @covers ::getName
+     * @covers ::getSlug
      * @covers ::__construct
      */
     public function testCanCreateFromArray() : void {
-        $team = Team::fromArray(['id' => 123, 'name' => 'some-name']);
+        $team = Team::fromArray(['id' => 123, 'name' => 'some name', 'slug' => 'some-name']);
         $this->assertSame(123, $team->getId());
-        $this->assertSame('some-name', $team->getName());
+        $this->assertSame('some name', $team->getName());
+        $this->assertSame('some-name', $team->getSlug());
     }
 
     /**

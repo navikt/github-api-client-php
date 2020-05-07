@@ -30,7 +30,7 @@ class ApiClientTest extends TestCase {
     public function testCanGetTeam() : void {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
-            [new Response(200, [], '{"id": 123, "name": "team"}')],
+            [new Response(200, [], '{"id": 123, "name": "team", "slug": "team"}')],
             $clientHistory
         );
 
@@ -81,7 +81,7 @@ class ApiClientTest extends TestCase {
     public function testCanCreateTeam() : void {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
-            [new Response(201, [], '{"id": 123, "name": "team-name"}')],
+            [new Response(201, [], '{"id": 123, "name": "team-name", "slug": "team-name"}')],
             $clientHistory
         );
 
@@ -104,8 +104,8 @@ class ApiClientTest extends TestCase {
      * @covers ::syncTeamAndGroup
      */
     public function testTeamSync() : void {
-        $teamId = 123;
-        $groupId = '123abc';
+        $slug        = 'group-name';
+        $groupId     = '123abc';
         $displayName = 'group name';
         $description = 'group description';
 
@@ -115,13 +115,13 @@ class ApiClientTest extends TestCase {
             $clientHistory
         );
 
-        $this->assertTrue((new ApiClient('navikt', 'access-token', $httpClient))->syncTeamAndGroup($teamId, $groupId, $displayName, $description));
+        $this->assertTrue((new ApiClient('navikt', 'access-token', $httpClient))->syncTeamAndGroup($slug, $groupId, $displayName, $description));
 
         $this->assertCount(1, $clientHistory, 'Expected one request');
 
         $request = $clientHistory[0]['request'];
         $this->assertSame('PATCH', $request->getMethod());
-        $this->assertSame('teams/123/team-sync/group-mappings', (string) $request->getUri());
+        $this->assertSame('orgs/navikt/teams/group-name/team-sync/group-mappings', (string) $request->getUri());
         $body = json_decode($request->getBody()->getContents(), true);
 
         $this->assertSame([
@@ -301,7 +301,7 @@ class ApiClientTest extends TestCase {
         $httpClient = $this->getMockClient(
             [
                 new Response(200, [], '{"id": 123}'),
-                new Response(200, [], '{"id": 123, "name": "team-name", "description": "team-description"}'),
+                new Response(200, [], '{"id": 123, "name": "team-name", "slug": "team-name"}'),
             ],
             $clientHistory
         );

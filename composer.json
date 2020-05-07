@@ -36,7 +36,7 @@
         "test:coverage": "vendor/bin/phpunit --coverage-html build/coverage",
         "sa": "vendor/bin/phpstan analyse src -l max",
         "ci": [
-            "composer validate",
+            "composer validate --strict",
             "@lint",
             "@sa",
             "@test"
