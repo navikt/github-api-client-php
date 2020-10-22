@@ -167,6 +167,12 @@ class ApiClientTest extends TestCase {
                                                 'nameId' => 'user2@nav.no'
                                             ],
                                         ],
+                                        [
+                                            'user' => null,
+                                            'samlIdentity' => [
+                                                'nameId' => 'user2@nav.no'
+                                            ],
+                                        ],
                                     ],
                                 ],
                             ],

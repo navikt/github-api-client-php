@@ -134,7 +134,7 @@ GQL;
              *               samlIdentity:array{
              *                 nameId:string
              *               },
-             *               user:array{
+             *               user?:array{
              *                 login:string
              *               }
              *             }
@@ -151,6 +151,10 @@ GQL;
             $offset   = $pageInfo['endCursor'];
 
             foreach ($nodes as $entity) {
+                if (empty($entity['user'])) {
+                    continue;
+                }
+
                 if ($entity['user']['login'] === $username) {
                     return $entity['samlIdentity']['nameId'];
                 }
