@@ -3,7 +3,3 @@ parameters:
     paths:
         - src
         - tests
-    ignoreErrors:
-        -
-            message: '#::fromArray\(\) expects array#'
-            path: tests/Models/TeamTest.php

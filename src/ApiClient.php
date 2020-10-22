@@ -35,17 +35,17 @@ class ApiClient {
      * Get a team by slug
      *
      * @param string $slug Slug of the team (name)
-     * @return ?Models\Team
+     * @return ?array<string,mixed>
      */
-    public function getTeam(string $slug) : ?Models\Team {
+    public function getTeam(string $slug) : ?array {
         try {
             $response = $this->httpClient->get(sprintf('orgs/%s/teams/%s', $this->organization, $slug));
         } catch (ClientException $e) {
             return null;
         }
 
-        /** @var Models\Team */
-        return Models\Team::fromApiResponse($response);
+        /** @var array<string,mixed> */
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
@@ -54,9 +54,9 @@ class ApiClient {
      * @param string $name The name of the team
      * @param string $description The description of the team
      * @throws InvalidArgumentException
-     * @return Models\Team
+     * @return array<string,mixed>
      */
-    public function createTeam(string $name, string $description) : Models\Team {
+    public function createTeam(string $name, string $description) : array {
         try {
             $response = $this->httpClient->post(sprintf('orgs/%s/teams', $this->organization), [
                 'json' => [
@@ -66,11 +66,11 @@ class ApiClient {
                 ],
             ]);
         } catch (ClientException $e) {
-            throw new RuntimeException('Unable to create team', $e->getCode(), $e);
+            throw new RuntimeException('Unable to create team', (int) $e->getCode(), $e);
         }
 
-        /** @var Models\Team */
-        return Models\Team::fromApiResponse($response);
+        /** @var array<string,mixed> */
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
@@ -116,9 +116,35 @@ GQL;
                     'json' => ['query' => sprintf($query, $this->organization, $offset ? sprintf('after: "%s"', $offset) : '')],
                 ]);
             } catch (ClientException $e) {
-                throw new RuntimeException('Unable to get SAML ID', $e->getCode(), $e);
+                throw new RuntimeException('Unable to get SAML ID', (int) $e->getCode(), $e);
             }
 
+            /**
+             * @var array{
+             *   data:array{
+             *     organization:array{
+             *       samlIdentityProvider:array{
+             *         externalIdentities:array{
+             *           pageInfo:array{
+             *             endCursor:string,
+             *             hasNextPage:bool
+             *           },
+             *           nodes:array<
+             *             array{
+             *               samlIdentity:array{
+             *                 nameId:string
+             *               },
+             *               user:array{
+             *                 login:string
+             *               }
+             *             }
+             *           >
+             *         }
+             *       }
+             *     }
+             *   }
+             * }
+             * */
             $data     = json_decode($response->getBody()->getContents(), true);
             $pageInfo = $data['data']['organization']['samlIdentityProvider']['externalIdentities']['pageInfo'];
             $nodes    = $data['data']['organization']['samlIdentityProvider']['externalIdentities']['nodes'];
@@ -156,7 +182,7 @@ GQL;
                 ]
             ]);
         } catch (ClientException $e) {
-            throw new RuntimeException('Unable to sync team and group', $e->getCode(), $e);
+            throw new RuntimeException('Unable to sync team and group', (int) $e->getCode(), $e);
         }
 
         return true;
@@ -168,29 +194,30 @@ GQL;
      * @param string $slug The team slug (name)
      * @param string $description The description
      * @throws InvalidArgumentException|RuntimeException
-     * @return Models\Team
+     * @return array<string,mixed>
      */
-    public function setTeamDescription(string $slug, string $description) : Models\Team {
+    public function setTeamDescription(string $slug, string $description) : array {
         try {
             $response = $this->httpClient->get(sprintf('orgs/%s/teams/%s', $this->organization, $slug));
         } catch (ClientException $e) {
-            throw new InvalidArgumentException('Team does not exist', $e->getCode(), $e);
+            throw new InvalidArgumentException('Team does not exist', (int) $e->getCode(), $e);
         }
 
-        $teamId = json_decode($response->getBody()->getContents(), true)['id'];
+        /** @var array{id:int} */
+        $team = json_decode($response->getBody()->getContents(), true);
 
         try {
-            $response = $this->httpClient->patch(sprintf('teams/%d', $teamId), [
+            $response = $this->httpClient->patch(sprintf('teams/%d', (int) $team['id']), [
                 'json' => [
                     'description' => $description,
                 ],
             ]);
         } catch (ClientException $e) {
-            throw new RuntimeException('Unable to update description', $e->getCode(), $e);
+            throw new RuntimeException('Unable to update description', (int) $e->getCode(), $e);
         }
 
-        /** @var Models\Team */
-        return Models\Team::fromApiResponse($response);
+        /** @var array<string,mixed> */
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
@@ -200,9 +227,12 @@ GQL;
      * @return ?string
      */
     private function getNextUrl(array $linkHeader) : ?string {
-        foreach (Header::parse($linkHeader) as $link) {
-            if (!empty($link['rel']) && 'next' === $link['rel']) {
-                return trim($link[0], '<>');
+        /** @var array<array{0:string,rel?:string}> */
+        $links = Header::parse($linkHeader);
+
+        foreach ($links as $link) {
+            if (array_key_exists('rel', $link) && 'next' === $link['rel']) {
+                return trim((string) $link[0], '<>');
             }
         }
 
@@ -222,8 +252,11 @@ GQL;
 
         while ($url) {
             $response = $this->httpClient->get($url);
-            $repos    = array_merge($repos, json_decode($response->getBody()->getContents(), true));
-            $url      = $this->getNextUrl($response->getHeader('Link'));
+
+            /** @var array<array<string,mixed>> */
+            $body  = json_decode($response->getBody()->getContents(), true);
+            $repos = array_merge($repos, $body);
+            $url   = $this->getNextUrl($response->getHeader('Link'));
         }
 
         return $repos;

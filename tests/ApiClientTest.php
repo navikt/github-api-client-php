@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 namespace NAVIT\GitHub;
 
-use NAVIT\GitHub\Models\Team;
 use PHPUnit\Framework\TestCase;
 use GuzzleHttp\{
     Client as HttpClient,
@@ -9,7 +8,6 @@ use GuzzleHttp\{
     HandlerStack,
     Psr7\Response,
     Psr7\Request,
-    Exception\ClientException,
     Middleware,
 };
 use InvalidArgumentException;
@@ -20,8 +18,9 @@ use RuntimeException;
  */
 class ApiClientTest extends TestCase {
     /**
-     * @param Response[] $responses
+     * @param array<int,Response> $responses
      * @param array<array{response:Response,request:Request}> $history
+     * @param-out array<array{response:Response,request:Request}> $history
      * @return HttpClient
      */
     private function getMockClient(array $responses, array &$history = []) : HttpClient {
@@ -37,15 +36,15 @@ class ApiClientTest extends TestCase {
     public function testCanGetTeam() : void {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
-            [new Response(200, [], '{"id": 123, "name": "team", "slug": "team"}')],
+            [new Response(200, [], '{"id": 123, "name": "team", "slug": "slug"}')],
             $clientHistory
         );
 
         $githubTeam = (new ApiClient('navikt', 'access-token', $httpClient))->getTeam('team');
 
         $this->assertCount(1, $clientHistory, 'Expected one request');
-        $this->assertInstanceOf(Team::class, $githubTeam);
         $this->assertSame('orgs/navikt/teams/team', (string) $clientHistory[0]['request']->getUri());
+        $this->assertSame(['id' => 123, 'name' => 'team', 'slug' => 'slug'], $githubTeam);
     }
 
     /**
@@ -80,19 +79,20 @@ class ApiClientTest extends TestCase {
     public function testCanCreateTeam() : void {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
-            [new Response(201, [], '{"id": 123, "name": "team-name", "slug": "team-name"}')],
+            [new Response(201, [], '{"id": 123, "name": "team-name", "slug": "team-slug"}')],
             $clientHistory
         );
 
         $githubTeam = (new ApiClient('navikt', 'access-token', $httpClient))->createTeam('team-name', 'team description');
 
-        $this->assertInstanceOf(Team::class, $githubTeam);
         $this->assertCount(1, $clientHistory, 'Expected one request');
+        $this->assertSame(['id' => 123, 'name' => 'team-name', 'slug' => 'team-slug'], $githubTeam);
 
         $request = $clientHistory[0]['request'];
         $this->assertSame('POST', $request->getMethod());
         $this->assertSame('orgs/navikt/teams', (string) $request->getUri());
 
+        /** @var array{name:string,description:string} */
         $body = json_decode($request->getBody()->getContents(), true);
 
         $this->assertSame('team-name', $body['name'], 'Team name not correct');
@@ -300,13 +300,13 @@ class ApiClientTest extends TestCase {
         $httpClient = $this->getMockClient(
             [
                 new Response(200, [], '{"id": 123}'),
-                new Response(200, [], '{"id": 123, "name": "team-name", "slug": "team-name"}'),
+                new Response(200, [], '{"id": 123, "name": "team-name", "slug": "team-slug"}'),
             ],
             $clientHistory
         );
 
-        $this->assertInstanceOf(
-            Team::class,
+        $this->assertSame(
+            ['id' => 123, 'name' => 'team-name', 'slug' => 'team-slug'],
             (new ApiClient('navikt', 'access-token', $httpClient))->setTeamDescription('team-name', 'team description')
         );
 
@@ -320,6 +320,7 @@ class ApiClientTest extends TestCase {
         $this->assertSame('PATCH', $patch->getMethod());
         $this->assertSame('teams/123', (string) $patch->getUri());
 
+        /** @var array{description:string} */
         $body = json_decode($patch->getBody()->getContents(), true);
 
         $this->assertSame('team description', $body['description'], 'Team description not correct');
