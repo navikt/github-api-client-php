@@ -20,8 +20,10 @@
     "require-dev": {
         "phpstan/extension-installer": "^1.0",
         "phpstan/phpstan": "^0.12",
-        "phpstan/phpstan-phpunit": "^0.12.16",
-        "phpunit/phpunit": "^9.3"
+        "phpstan/phpstan-phpunit": "^0.12",
+        "phpunit/phpunit": "^9.3",
+        "psalm/plugin-phpunit": "^0.13",
+        "vimeo/psalm": "^4.0"
     },
     "autoload": {
         "psr-4": {

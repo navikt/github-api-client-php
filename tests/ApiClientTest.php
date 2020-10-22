@@ -19,6 +19,11 @@ use RuntimeException;
  * @coversDefaultClass NAVIT\GitHub\ApiClient
  */
 class ApiClientTest extends TestCase {
+    /**
+     * @param Response[] $responses
+     * @param array<array{response:Response,request:Request}> $history
+     * @return HttpClient
+     */
     private function getMockClient(array $responses, array &$history = []) : HttpClient {
         $handler = HandlerStack::create(new MockHandler($responses));
         $handler->push(Middleware::history($history));
@@ -49,11 +54,7 @@ class ApiClientTest extends TestCase {
     public function testReturnsNullWhenTeamIsNotFound() : void {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
-            [new ClientException(
-                'team not found',
-                new Request('GET', 'orgs/navikt/teams/team'),
-                new Response(404)
-            )],
+            [new Response(404, [], 'team not found')],
             $clientHistory
         );
 
@@ -66,11 +67,7 @@ class ApiClientTest extends TestCase {
     public function testReturnsNullOnError() : void {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
-            [new ClientException(
-                'Forbidden',
-                new Request('GET', 'orgs/navikt/teams/team'),
-                new Response(403)
-            )],
+            [new Response(403, [], 'Forbidden')],
             $clientHistory
         );
 
@@ -144,7 +141,7 @@ class ApiClientTest extends TestCase {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
             [
-                new Response(200, [], json_encode([
+                new Response(200, [], (string) json_encode([
                     'data' => [
                         'organization' => [
                             'samlIdentityProvider' => [
@@ -177,7 +174,7 @@ class ApiClientTest extends TestCase {
                     ],
                 ])),
 
-                new Response(200, [], json_encode([
+                new Response(200, [], (string) json_encode([
                     'data' => [
                         'organization' => [
                             'samlIdentityProvider' => [
@@ -223,7 +220,7 @@ class ApiClientTest extends TestCase {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
             [
-                new Response(200, [], json_encode([
+                new Response(200, [], (string) json_encode([
                     'data' => [
                         'organization' => [
                             'samlIdentityProvider' => [
@@ -256,7 +253,7 @@ class ApiClientTest extends TestCase {
                     ],
                 ])),
 
-                new Response(200, [], json_encode([
+                new Response(200, [], (string) json_encode([
                     'data' => [
                         'organization' => [
                             'samlIdentityProvider' => [
