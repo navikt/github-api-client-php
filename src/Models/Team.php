@@ -4,17 +4,12 @@ namespace NAVIT\GitHub\Models;
 use InvalidArgumentException;
 
 class Team extends Model {
-    /** @var int */
-    private $id;
-
-    /** @var string */
-    private $name;
-
-    /** @var string */
-    private $slug;
+    private int $id;
+    private string $name;
+    private string $slug;
 
     public function __construct(int $id, string $name, string $slug) {
-        $this->id = $id;
+        $this->id   = $id;
         $this->name = $name;
         $this->slug = $slug;
     }
@@ -31,6 +26,11 @@ class Team extends Model {
         return $this->slug;
     }
 
+    /**
+     * @param array{id:int,name:string,slug:string} $data
+     * @throws InvalidArgumentException
+     * @return self
+     */
     public static function fromArray(array $data) : self {
         foreach (['id', 'name', 'slug'] as $required) {
             if (empty($data[$required])) {

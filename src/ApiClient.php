@@ -1,22 +1,17 @@
 <?php declare(strict_types=1);
 namespace NAVIT\GitHub;
 
-use GuzzleHttp\Client as HttpClient;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Psr7;
+use GuzzleHttp\{
+    Client as HttpClient,
+    Exception\ClientException,
+    Psr7\Header,
+};
 use InvalidArgumentException;
 use RuntimeException;
 
 class ApiClient {
-    /**
-     * @var string
-     */
-    private $organization;
-
-    /**
-     * @var HttpClient
-     */
-    private $httpClient;
+    private string $organization;
+    private HttpClient $httpClient;
 
     /**
      * Class constructor
@@ -40,7 +35,7 @@ class ApiClient {
      * Get a team by slug
      *
      * @param string $slug Slug of the team (name)
-     * @return Models\Team|null
+     * @return ?Models\Team
      */
     public function getTeam(string $slug) : ?Models\Team {
         try {
@@ -67,7 +62,7 @@ class ApiClient {
                 'json' => [
                     'name'        => $name,
                     'description' => $description,
-                    'privacy'     => 'closed'
+                    'privacy'     => 'closed',
                 ],
             ]);
         } catch (ClientException $e) {
@@ -87,7 +82,7 @@ class ApiClient {
      *
      * @param string $username The GitHub login
      * @throws RuntimeException
-     * @return string|null
+     * @return ?string
      */
     public function getSamlId(string $username) : ?string {
         $offset = null;
@@ -201,11 +196,11 @@ GQL;
     /**
      * Get the next URL given a Link-header
      *
-     * @param array $linkHeader
+     * @param string[] $linkHeader
      * @return ?string
      */
     private function getNextUrl(array $linkHeader) : ?string {
-        foreach (Psr7\parse_header($linkHeader) as $link) {
+        foreach (Header::parse($linkHeader) as $link) {
             if (!empty($link['rel']) && 'next' === $link['rel']) {
                 return trim($link[0], '<>');
             }
@@ -219,7 +214,7 @@ GQL;
      *
      * Fetch all repos connected to the organization the client is set up for.
      *
-     * @return array
+     * @return array<array<string,mixed>>
      */
     public function getRepos() : array {
         $repos = [];
