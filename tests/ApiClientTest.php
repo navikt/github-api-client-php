@@ -392,4 +392,26 @@ class ApiClientTest extends TestCase {
         $this->assertSame('orgs/navikt/repos?per_page=100&page=2', (string) $clientHistory[1]['request']->getUri());
         $this->assertSame([['id' => 1], ['id' => 2]], $repos);
     }
+
+    /**
+     * @covers ::getMembers
+     * @covers ::getNextUrl
+     */
+    public function testCanGetMembers() : void {
+        $clientHistory = [];
+        $httpClient = $this->getMockClient(
+            [
+                new Response(200, ['Link' => '<orgs/navikt/members?per_page=100&page=2>; rel="next", <orgs/navikt/members?per_page=100&page=17>; rel="last"'], '[{"id": 1}]'),
+                new Response(200, ['Link' => '<orgs/navikt/members?per_page=100&page=17>; rel="last"'], '[{"id": 2}]'),
+            ],
+            $clientHistory
+        );
+
+        $members = (new ApiClient('navikt', 'access-token', $httpClient))->getMembers();
+
+        $this->assertCount(2, $clientHistory, 'Expected two requests');
+        $this->assertSame('orgs/navikt/members?per_page=100', (string) $clientHistory[0]['request']->getUri());
+        $this->assertSame('orgs/navikt/members?per_page=100&page=2', (string) $clientHistory[1]['request']->getUri());
+        $this->assertSame([['id' => 1], ['id' => 2]], $members);
+    }
 }

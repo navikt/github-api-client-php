@@ -265,4 +265,25 @@ GQL;
 
         return $repos;
     }
+
+    /**
+     * Get all organization members
+     *
+     * @return array<array<string,mixed>>
+     */
+    public function getMembers() : array {
+        $members = [];
+        $url = sprintf('orgs/%s/members?per_page=100', $this->organization);
+
+        while ($url) {
+            $response = $this->httpClient->get($url);
+
+            /** @var array<array<string,mixed>> */
+            $body    = json_decode($response->getBody()->getContents(), true);
+            $members = array_merge($members, $body);
+            $url     = $this->getNextUrl($response->getHeader('Link'));
+        }
+
+        return $members;
+    }
 }
