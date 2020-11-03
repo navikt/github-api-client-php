@@ -225,6 +225,26 @@ GQL;
     }
 
     /**
+     * Get all repos
+     *
+     * Fetch all repos connected to the organization the client is set up for.
+     *
+     * @return array<array<string,mixed>>
+     */
+    public function getRepos() : array {
+        return $this->getPaginatedResult(sprintf('orgs/%s/repos', $this->organization));
+    }
+
+    /**
+     * Get all organization members
+     *
+     * @return array<array<string,mixed>>
+     */
+    public function getMembers() : array {
+        return $this->getPaginatedResult(sprintf('orgs/%s/members', $this->organization));
+    }
+
+    /**
      * Get the next URL given a Link-header
      *
      * @param string[] $linkHeader
@@ -244,46 +264,29 @@ GQL;
     }
 
     /**
-     * Get all repos
+     * Get paginated results
      *
-     * Fetch all repos connected to the organization the client is set up for.
-     *
+     * @param string $url
      * @return array<array<string,mixed>>
      */
-    public function getRepos() : array {
-        $repos = [];
-        $url = sprintf('orgs/%s/repos?per_page=100', $this->organization);
+    private function getPaginatedResult(string $url) : array {
+        $requestOptions = [
+            'query' => [
+                'per_page' => 100,
+            ],
+        ];
+        $entities = [];
 
         while ($url) {
-            $response = $this->httpClient->get($url);
+            $response = $this->httpClient->get($url, $requestOptions);
 
             /** @var array<array<string,mixed>> */
-            $body  = json_decode($response->getBody()->getContents(), true);
-            $repos = array_merge($repos, $body);
-            $url   = $this->getNextUrl($response->getHeader('Link'));
+            $body           = json_decode($response->getBody()->getContents(), true);
+            $entities       = array_merge($entities, $body);
+            $url            = $this->getNextUrl($response->getHeader('Link'));
+            $requestOptions = []; // We only need this for the first request
         }
 
-        return $repos;
-    }
-
-    /**
-     * Get all organization members
-     *
-     * @return array<array<string,mixed>>
-     */
-    public function getMembers() : array {
-        $members = [];
-        $url = sprintf('orgs/%s/members?per_page=100', $this->organization);
-
-        while ($url) {
-            $response = $this->httpClient->get($url);
-
-            /** @var array<array<string,mixed>> */
-            $body    = json_decode($response->getBody()->getContents(), true);
-            $members = array_merge($members, $body);
-            $url     = $this->getNextUrl($response->getHeader('Link'));
-        }
-
-        return $members;
+        return $entities;
     }
 }

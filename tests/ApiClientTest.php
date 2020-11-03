@@ -373,6 +373,7 @@ class ApiClientTest extends TestCase {
 
     /**
      * @covers ::getRepos
+     * @covers ::getPaginatedResult
      * @covers ::getNextUrl
      */
     public function testCanGetRepos() : void {
@@ -395,6 +396,7 @@ class ApiClientTest extends TestCase {
 
     /**
      * @covers ::getMembers
+     * @covers ::getPaginatedResult
      * @covers ::getNextUrl
      */
     public function testCanGetMembers() : void {
