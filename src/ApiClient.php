@@ -298,4 +298,33 @@ GQL;
 
         return $entities;
     }
+
+    /**
+     * Create a workflow dispatch event
+     *
+     * @param string $repo The repository that owns the workflow
+     * @param string $workflow The name of the workflow file or the workflow ID
+     * @param string $ref The git reference for the workflow
+     * @param array<string,mixed> $inputs Optional inputs for the workflow
+     * @throws RuntimeException
+     * @return void
+     */
+    public function dispatchWorkflow(string $repo, string $workflow, string $ref, array $inputs = []): void
+    {
+        try {
+            $this->httpClient->post(sprintf(
+                'repos/%s/%s/actions/workflows/%s/dispatches',
+                $this->organization,
+                $repo,
+                $workflow,
+            ), [
+                'json' => array_filter([
+                    'ref' => $ref,
+                    'inputs' => $inputs,
+                ]),
+            ]);
+        } catch (ClientException $e) {
+            throw new RuntimeException('Unable to create workflow dispatch event', (int) $e->getCode(), $e);
+        }
+    }
 }
