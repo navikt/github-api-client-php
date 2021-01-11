@@ -17,6 +17,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
+          tools: php-cs-fixer
 
       - name: PHP version
         run: |
@@ -55,3 +56,6 @@ jobs:
 
       - name: Check coding standard
         run: composer run cs
+        env:
+          PHP_CS_FIXER_IGNORE_ENV: 1
+
