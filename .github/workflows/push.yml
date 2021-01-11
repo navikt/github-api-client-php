@@ -52,3 +52,6 @@ jobs:
 
       - name: Run static code analysis
         run: composer run sa
+
+      - name: Check coding standard
+        run: composer run cs
