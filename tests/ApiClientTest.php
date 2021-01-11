@@ -428,4 +428,47 @@ class ApiClientTest extends TestCase
         $this->assertSame('orgs/navikt/members?per_page=100&page=2', (string) $clientHistory[1]['request']->getUri());
         $this->assertSame([['id' => 1], ['id' => 2]], $members);
     }
+
+    /**
+     * @return array<string,array{ref:string,inputs:array<string,mixed>,expectedOutput:array{ref:string,inputs?:array<string,mixed>}}>
+     */
+    public function getDispatchWorkflowData(): array
+    {
+        return [
+            'with input' => [
+                'ref' => 'main',
+                'inputs' => ['foo' => 'bar'],
+                'expectedOutput' => ['ref' => 'main', 'inputs' => ['foo' => 'bar']],
+            ],
+            'without input' => [
+                'ref' => 'main',
+                'inputs' => [],
+                'expectedOutput' => ['ref' => 'main'],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider getDispatchWorkflowData
+     * @covers ::dispatchWorkflow
+     * @param string $ref
+     * @param array<string,mixed> $inputs
+     * @param array{ref:string,inputs?:array<string,mixed>} $expectedBody
+     */
+    public function testCanDispatchWorkflow(string $ref, array $inputs, array $expectedBody): void
+    {
+        $clientHistory = [];
+        $httpClient = $this->getMockClient(
+            [
+                new Response(204),
+            ],
+            $clientHistory
+        );
+        (new ApiClient('navikt', 'access-token', $httpClient))->dispatchWorkflow('repo', 'workflow.yml', $ref, $inputs);
+
+        $this->assertCount(1, $clientHistory, 'Expected one request');
+        $this->assertSame('POST', $clientHistory[0]['request']->getMethod());
+        $this->assertSame('repos/navikt/repo/actions/workflows/workflow.yml/dispatches', (string) $clientHistory[0]['request']->getUri());
+        $this->assertSame($expectedBody, json_decode($clientHistory[0]['request']->getBody()->getContents(), true));
+    }
 }
