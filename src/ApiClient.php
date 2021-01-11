@@ -1,15 +1,14 @@
 <?php declare(strict_types=1);
 namespace NAVIT\GitHub;
 
-use GuzzleHttp\{
-    Client as HttpClient,
-    Exception\ClientException,
-    Psr7\Header,
-};
+use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Psr7\Header;
 use InvalidArgumentException;
 use RuntimeException;
 
-class ApiClient {
+class ApiClient
+{
     private string $organization;
     private HttpClient $httpClient;
 
@@ -20,13 +19,14 @@ class ApiClient {
      * @param string $personalAccessToken The personal access token to use
      * @param HttpClient $httpClient Pre-configured HTTP client to use
      */
-    public function __construct(string $organization, string $personalAccessToken, HttpClient $httpClient = null) {
+    public function __construct(string $organization, string $personalAccessToken, HttpClient $httpClient = null)
+    {
         $this->organization = $organization;
         $this->httpClient = $httpClient ?: new HttpClient([
             'base_uri' => 'https://api.github.com/',
             'auth' => ['x-access-token', $personalAccessToken],
             'headers' => [
-                'Accept' => 'application/json'
+                'Accept' => 'application/json',
             ],
         ]);
     }
@@ -37,7 +37,8 @@ class ApiClient {
      * @param string $slug Slug of the team (name)
      * @return ?array<string,mixed>
      */
-    public function getTeam(string $slug) : ?array {
+    public function getTeam(string $slug): ?array
+    {
         try {
             $response = $this->httpClient->get(sprintf('orgs/%s/teams/%s', $this->organization, $slug));
         } catch (ClientException $e) {
@@ -56,7 +57,8 @@ class ApiClient {
      * @throws InvalidArgumentException
      * @return array<string,mixed>
      */
-    public function createTeam(string $name, string $description) : array {
+    public function createTeam(string $name, string $description): array
+    {
         try {
             $response = $this->httpClient->post(sprintf('orgs/%s/teams', $this->organization), [
                 'json' => [
@@ -84,7 +86,8 @@ class ApiClient {
      * @throws RuntimeException
      * @return ?string
      */
-    public function getSamlId(string $username) : ?string {
+    public function getSamlId(string $username): ?string
+    {
         $offset = null;
         $query = <<<GQL
         query {
@@ -174,7 +177,8 @@ GQL;
      * @throws RuntimeException
      * @return bool
      */
-    public function syncTeamAndGroup(string $slug, string $groupId, string $displayName, string $description) : bool {
+    public function syncTeamAndGroup(string $slug, string $groupId, string $displayName, string $description): bool
+    {
         try {
             $this->httpClient->patch(sprintf('orgs/%s/teams/%s/team-sync/group-mappings', $this->organization, $slug), [
                 'json' => [
@@ -182,8 +186,8 @@ GQL;
                         'group_id'          => $groupId,
                         'group_name'        => $displayName,
                         'group_description' => $description,
-                    ]]
-                ]
+                    ]],
+                ],
             ]);
         } catch (ClientException $e) {
             throw new RuntimeException('Unable to sync team and group', (int) $e->getCode(), $e);
@@ -200,7 +204,8 @@ GQL;
      * @throws InvalidArgumentException|RuntimeException
      * @return array<string,mixed>
      */
-    public function setTeamDescription(string $slug, string $description) : array {
+    public function setTeamDescription(string $slug, string $description): array
+    {
         try {
             $response = $this->httpClient->get(sprintf('orgs/%s/teams/%s', $this->organization, $slug));
         } catch (ClientException $e) {
@@ -231,7 +236,8 @@ GQL;
      *
      * @return array<array<string,mixed>>
      */
-    public function getRepos() : array {
+    public function getRepos(): array
+    {
         return $this->getPaginatedResult(sprintf('orgs/%s/repos', $this->organization));
     }
 
@@ -240,7 +246,8 @@ GQL;
      *
      * @return array<array<string,mixed>>
      */
-    public function getMembers() : array {
+    public function getMembers(): array
+    {
         return $this->getPaginatedResult(sprintf('orgs/%s/members', $this->organization));
     }
 
@@ -250,7 +257,8 @@ GQL;
      * @param string[] $linkHeader
      * @return ?string
      */
-    private function getNextUrl(array $linkHeader) : ?string {
+    private function getNextUrl(array $linkHeader): ?string
+    {
         /** @var array<array{0:string,rel?:string}> */
         $links = Header::parse($linkHeader);
 
@@ -269,7 +277,8 @@ GQL;
      * @param string $url
      * @return array<array<string,mixed>>
      */
-    private function getPaginatedResult(string $url) : array {
+    private function getPaginatedResult(string $url): array
+    {
         $requestOptions = [
             'query' => [
                 'per_page' => 100,

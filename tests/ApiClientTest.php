@@ -1,29 +1,29 @@
 <?php declare(strict_types=1);
 namespace NAVIT\GitHub;
 
-use PHPUnit\Framework\TestCase;
-use GuzzleHttp\{
-    Client as HttpClient,
-    Handler\MockHandler,
-    HandlerStack,
-    Psr7\Response,
-    Psr7\Request,
-    Middleware,
-};
+use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
 /**
  * @coversDefaultClass NAVIT\GitHub\ApiClient
  */
-class ApiClientTest extends TestCase {
+class ApiClientTest extends TestCase
+{
     /**
      * @param array<int,Response> $responses
      * @param array<array{response:Response,request:Request}> $history
      * @param-out array<array{response:Response,request:Request}> $history
      * @return HttpClient
      */
-    private function getMockClient(array $responses, array &$history = []) : HttpClient {
+    private function getMockClient(array $responses, array &$history = []): HttpClient
+    {
         $handler = HandlerStack::create(new MockHandler($responses));
         $handler->push(Middleware::history($history));
 
@@ -33,7 +33,8 @@ class ApiClientTest extends TestCase {
     /**
      * @covers ::getTeam
      */
-    public function testCanGetTeam() : void {
+    public function testCanGetTeam(): void
+    {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
             [new Response(200, [], '{"id": 123, "name": "team", "slug": "slug"}')],
@@ -50,7 +51,8 @@ class ApiClientTest extends TestCase {
     /**
      * @covers ::getTeam
      */
-    public function testReturnsNullWhenTeamIsNotFound() : void {
+    public function testReturnsNullWhenTeamIsNotFound(): void
+    {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
             [new Response(404, [], 'team not found')],
@@ -63,7 +65,8 @@ class ApiClientTest extends TestCase {
     /**
      * @covers ::getTeam
      */
-    public function testReturnsNullOnError() : void {
+    public function testReturnsNullOnError(): void
+    {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
             [new Response(403, [], 'Forbidden')],
@@ -76,7 +79,8 @@ class ApiClientTest extends TestCase {
     /**
      * @covers ::createTeam
      */
-    public function testCanCreateTeam() : void {
+    public function testCanCreateTeam(): void
+    {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
             [new Response(201, [], '{"id": 123, "name": "team-name", "slug": "team-slug"}')],
@@ -102,7 +106,8 @@ class ApiClientTest extends TestCase {
     /**
      * @covers ::syncTeamAndGroup
      */
-    public function testTeamSync() : void {
+    public function testTeamSync(): void
+    {
         $slug        = 'group-name';
         $groupId     = '123abc';
         $displayName = 'group name';
@@ -129,15 +134,16 @@ class ApiClientTest extends TestCase {
                     'group_id'          => '123abc',
                     'group_name'        => 'group name',
                     'group_description' => 'group description',
-                ]
-            ]
+                ],
+            ],
         ], $body);
     }
 
     /**
      * @covers ::getSamlId
      */
-    public function testCanGetSamlId() : void {
+    public function testCanGetSamlId(): void
+    {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
             [
@@ -156,7 +162,7 @@ class ApiClientTest extends TestCase {
                                                 'login' => 'user1',
                                             ],
                                             'samlIdentity' => [
-                                                'nameId' => 'user1@nav.no'
+                                                'nameId' => 'user1@nav.no',
                                             ],
                                         ],
                                         [
@@ -164,13 +170,13 @@ class ApiClientTest extends TestCase {
                                                 'login' => 'user2',
                                             ],
                                             'samlIdentity' => [
-                                                'nameId' => 'user2@nav.no'
+                                                'nameId' => 'user2@nav.no',
                                             ],
                                         ],
                                         [
                                             'user' => null,
                                             'samlIdentity' => [
-                                                'nameId' => 'user2@nav.no'
+                                                'nameId' => 'user2@nav.no',
                                             ],
                                         ],
                                     ],
@@ -195,7 +201,7 @@ class ApiClientTest extends TestCase {
                                                 'login' => 'user3',
                                             ],
                                             'samlIdentity' => [
-                                                'nameId' => 'user3@nav.no'
+                                                'nameId' => 'user3@nav.no',
                                             ],
                                         ],
                                         [
@@ -203,7 +209,7 @@ class ApiClientTest extends TestCase {
                                                 'login' => 'user4',
                                             ],
                                             'samlIdentity' => [
-                                                'nameId' => 'user4@nav.no'
+                                                'nameId' => 'user4@nav.no',
                                             ],
                                         ],
                                     ],
@@ -222,7 +228,8 @@ class ApiClientTest extends TestCase {
     /**
      * @covers ::getSamlId
      */
-    public function testReturnsNullWhenSamlIdDoesNotExist() : void {
+    public function testReturnsNullWhenSamlIdDoesNotExist(): void
+    {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
             [
@@ -241,7 +248,7 @@ class ApiClientTest extends TestCase {
                                                 'login' => 'user1',
                                             ],
                                             'samlIdentity' => [
-                                                'nameId' => 'user1@nav.no'
+                                                'nameId' => 'user1@nav.no',
                                             ],
                                         ],
                                         [
@@ -249,7 +256,7 @@ class ApiClientTest extends TestCase {
                                                 'login' => 'user2',
                                             ],
                                             'samlIdentity' => [
-                                                'nameId' => 'user2@nav.no'
+                                                'nameId' => 'user2@nav.no',
                                             ],
                                         ],
                                     ],
@@ -274,7 +281,7 @@ class ApiClientTest extends TestCase {
                                                 'login' => 'user3',
                                             ],
                                             'samlIdentity' => [
-                                                'nameId' => 'user3@nav.no'
+                                                'nameId' => 'user3@nav.no',
                                             ],
                                         ],
                                         [
@@ -282,7 +289,7 @@ class ApiClientTest extends TestCase {
                                                 'login' => 'user4',
                                             ],
                                             'samlIdentity' => [
-                                                'nameId' => 'user4@nav.no'
+                                                'nameId' => 'user4@nav.no',
                                             ],
                                         ],
                                     ],
@@ -301,7 +308,8 @@ class ApiClientTest extends TestCase {
     /**
      * @covers ::setTeamDescription
      */
-    public function testCanSetTeamDescription() : void {
+    public function testCanSetTeamDescription(): void
+    {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
             [
@@ -335,7 +343,8 @@ class ApiClientTest extends TestCase {
     /**
      * @covers ::setTeamDescription
      */
-    public function testSetTeamDescriptionFailsWhenTeamDoesNotExist() : void {
+    public function testSetTeamDescriptionFailsWhenTeamDoesNotExist(): void
+    {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
             [
@@ -354,7 +363,8 @@ class ApiClientTest extends TestCase {
     /**
      * @covers ::setTeamDescription
      */
-    public function testSetTeamDescriptionFailsWhenPatchFails() : void {
+    public function testSetTeamDescriptionFailsWhenPatchFails(): void
+    {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
             [
@@ -376,7 +386,8 @@ class ApiClientTest extends TestCase {
      * @covers ::getPaginatedResult
      * @covers ::getNextUrl
      */
-    public function testCanGetRepos() : void {
+    public function testCanGetRepos(): void
+    {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
             [
@@ -399,7 +410,8 @@ class ApiClientTest extends TestCase {
      * @covers ::getPaginatedResult
      * @covers ::getNextUrl
      */
-    public function testCanGetMembers() : void {
+    public function testCanGetMembers(): void
+    {
         $clientHistory = [];
         $httpClient = $this->getMockClient(
             [
