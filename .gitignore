@@ -4,3 +4,4 @@ vendor
 .idea
 .vscode
 .php_cs.cache
+.php-cs-fixer.cache

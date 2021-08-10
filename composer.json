@@ -18,10 +18,7 @@
         "guzzlehttp/guzzle": "^7.2"
     },
     "require-dev": {
-        "navikt/coding-standard": "dev-main",
-        "phpstan/extension-installer": "^1.0",
-        "phpstan/phpstan": "^0.12",
-        "phpstan/phpstan-phpunit": "^0.12",
+        "navikt/coding-standard": "^2.0",
         "phpunit/phpunit": "^9.3",
         "psalm/plugin-phpunit": "^0.15.0",
         "vimeo/psalm": "^4.0"
@@ -40,13 +37,9 @@
         "lint": "for file in `git ls-files '*.php'`; do php -l $file; done",
         "test": "vendor/bin/phpunit",
         "test:coverage": "vendor/bin/phpunit --coverage-html build/coverage",
-        "sa": [
-            "@phpstan",
-            "@psalm"
-        ],
-        "phpstan": "vendor/bin/phpstan analyse",
+        "sa": "@psalm",
         "psalm": "vendor/bin/psalm",
-        "cs": "php-cs-fixer fix --dry-run --diff --diff-format udiff",
+        "cs": "php-cs-fixer fix --dry-run --diff",
         "ci": [
             "composer validate --strict",
             "@lint",
